@@ -20,8 +20,8 @@ func main() {
 		connString = strings.Replace(connString, "\n", "", -1)
 
 		fmt.Print("sql str -> ")
-		sqlString, _ := reader.ReadString('\n')
-		sqlString = strings.Replace(sqlString, "\n", "", -1)
+		query, _ := reader.ReadString('\n')
+		query = strings.Replace(query, "\n", "", -1)
 
 		fmt.Println("")
 	}
