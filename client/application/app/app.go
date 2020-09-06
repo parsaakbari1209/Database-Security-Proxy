@@ -6,60 +6,53 @@ import (
 	"log"
 
 	"github.com/parsaakbari1209/Database-Security-Proxy/client/application/tlspb"
-	"google.golang.org/grpc"
 )
-
-var (
-	// c package-level variable is the connection to client-side-tls-service.
-	c tlspb.TLSClientServiceClient
-)
-
-// StartService func dials to the client-side-tls-service.
-func StartService() {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithInsecure())
-	if err != nil {
-		log.Fatalf("Failed to connect client-side-tls-service: %v", err)
-	}
-	defer conn.Close()
-	c = tlspb.NewTLSClientServiceClient(conn)
-}
 
 // SendReq func sends a gRPC request to the client-side-tls-service.
-// Then returns the stream that is coming from client-side-tls-service as an 2D array.
-func SendReq(connString, query string) [][]string {
+// Then, returns the stream that is coming from client-side-tls-service as a 2D array.
+func SendReq(connString, query string, c tlspb.TLSClientServiceClient) [][]string {
 	// Request that is going to be sent to client-side-tls-service.
 	req := &tlspb.TLSClientRequest{
 		ConnString: connString,
 		SqlString:  query,
 	}
-	// Calling the releated RPC with no deadlines.
+
+	// Call the releated RPC with no deadlines.
 	res, err := c.TLSClientSend(context.Background(), req)
 	if err != nil {
 		log.Fatalf("error while calling TLSClientSend RPC: %v", err)
 	}
-	// Recive stream and return the results as array.
+	// TODO: Add streaming functionality for responding the function call.
+	// Recive stream and, return the results as a 2D array.
 	result := [][]string{}
 	for {
 		msg, err := res.Recv()
-		if err == io.EOF { // End of streaming.
+		if err == io.EOF {
+			// End of streaming.
 			break
 		}
-		if err != nil { // Other errors.
+		if err != nil {
+			// Other errors.
 			log.Fatalf("error while server-side-tls-service streaming: %v", err)
 		}
-		if msg.GetSucceed() == false { // Check if the operation was successful.
+		// Check if the operation was successful.
+		if msg.GetSucceed() == false {
 			log.Fatalf("error is occured and stream is not succeed: %v", msg.GetError())
 		}
+		// Append stream result to the 2D array.
 		result = append(result, []string{
 			boolToString(msg.GetSucceed()),
 			msg.GetResult(),
 			msg.GetError(),
 		})
 	}
+	// Return the 2D array.
 	return result
 }
 
 // boolToString func returns the bool as a string value.
+// "false" for false boolean.
+// "true" for true boolean.
 func boolToString(theBool bool) string {
 	res := "false"
 	if theBool == true {
