@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package tlspb;
+option go_package = "tls/tlspb";
+
+message TLSClientRequest {
+    string conn_string = 1;
+    string sql_string = 2;
+}
+
+message TLSClientResponse {
+    bool succeed = 1;
+    string error = 2;
+    string result = 3;
+}
+
+service TLSClientService {
+    // This rpc is for client application to call the tls service running on the client behalf.
+    // The client side tls service will send the request to the database-secuirty-service securly.
+   rpc TLSClientSend(TLSClientRequest) returns (stream TLSClientResponse) {};
+}
