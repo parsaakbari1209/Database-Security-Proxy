@@ -47,7 +47,7 @@ func StartService() {
 	// Configure a listener on port 50051.
 	lis, err := net.Listen("tcp", "localhost:50051")
 	if err != nil {
-		log.Fatalf("faild to listen: %v", err)
+		log.Fatalf("failed to listen: %v", err)
 	}
 
 	// Create a new grpc server that serves client-side-tls-service.
