@@ -1,7 +1,7 @@
 syntax = "proto3";
 
 package tlspb;
-option go_package = "tls/tlspb";
+option go_package = "github.com/parsaakbari1209/Database-Security-Proxy/client/tls/tlspb";
 
 message TLSClientRequest {
     string conn_string = 1;
