@@ -11,14 +11,14 @@ import (
 	"google.golang.org/grpc"
 )
 
+// server struct implementes the TLSClientServiceServer interface.
 type server struct{}
 
-// TODO: Not implemented (It is a mock.).
 // Send Client request from client-side-tls-service to server-side-tls-service and return response.
 func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClientService_TLSClientSendServer) error {
 	fmt.Println("TLSClientSend RPC invoked.")
 
-	// Client Request data extraction.
+	// Extract data from client request.
 	connString := req.GetConnString()
 	sqlString := req.GetSqlString()
 
@@ -51,8 +51,10 @@ func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClie
 			break
 		}
 		if err != nil {
+			// Other errors.
 			log.Fatalf("error while reciving stream: %v", err)
 		}
+		// Create new responses to send the client.
 		newRes := &tlspb.TLSClientResponse{
 			Succeed: msg.GetSucceed(),
 			Result:  msg.GetResult(),
