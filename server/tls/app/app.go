@@ -20,6 +20,7 @@ type server struct{}
 // Third, gets stream response from database-security-service.
 // Forth, encryptes the reponses and streams to client-side-tls-service.
 func (s *server) TLSServerSend(req *tlspb.TLSServerRequest, stream tlspb.TLSServerService_TLSServerSendServer) error {
+	fmt.Println("TLSServerSend RPC invoked.")
 	// Mock code!
 	for i := 0; i < 10; i++ {
 		res := &tlspb.TLSServerResponse{
@@ -37,7 +38,7 @@ func (s *server) TLSServerSend(req *tlspb.TLSServerRequest, stream tlspb.TLSServ
 // StartService func start to listen on a port.
 // The transport protocol is tcp.
 func StartService() {
-	fmt.Println("started server-side-tls-service server...")
+	fmt.Println("started server-side-tls-service...")
 
 	// Configure a listener on port 50052.
 	lis, err := net.Listen("tcp", "localhost:50052")
