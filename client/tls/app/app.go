@@ -1,11 +1,11 @@
 package app
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
-	"strconv"
-	"time"
 
 	"github.com/parsaakbari1209/Database-Security-Proxy/client/tls/tlspb"
 	"google.golang.org/grpc"
@@ -17,23 +17,48 @@ type server struct{}
 // Send Client request from client-side-tls-service to server-side-tls-service and return response.
 func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClientService_TLSClientSendServer) error {
 	fmt.Println("TLSClientSend RPC invoked.")
-	// Client Request data extraction.
-	//connString := req.GetConnString()
-	//sqlString := req.GetSqlString()
-	// Call server-side-tls-service with a new request.
-	// Not implemented...
-	// Return server-side-tls-service stream to the client.
-	// Not implemented...
 
-	// Mock anwser.
-	for i := 0; i < 10; i++ {
-		res := &tlspb.TLSClientResponse{
-			Succeed: true,
-			Result:  "Number: " + strconv.Itoa(i),
-			Error:   "",
+	// Client Request data extraction.
+	connString := req.GetConnString()
+	sqlString := req.GetSqlString()
+
+	// Dial to the server-side-tls-service server.
+	address := "localhost:50052"
+	cc, err := grpc.Dial(address, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect server-side-tls-service: %v", err)
+	}
+	defer cc.Close()
+	c := tlspb.NewTLSServerServiceClient(cc)
+
+	// Create request for the TLSServerSend RPC.
+	newReq := &tlspb.TLSServerRequest{
+		ConnString: connString,
+		SqlString:  sqlString,
+	}
+
+	// Call server-side-tls-service TLSServerSend RPC.
+	res, err := c.TLSServerSend(context.Background(), newReq)
+	if err != nil {
+		log.Fatalf("error while calling TLSServerSend RPC: %v", err)
+	}
+
+	// Return server-side-tls-service stream to the client.
+	for {
+		msg, err := res.Recv()
+		if err == io.EOF {
+			// End of stream.
+			break
 		}
-		stream.Send(res)
-		time.Sleep(1 * time.Second)
+		if err != nil {
+			log.Fatalf("error while reciving stream: %v", err)
+		}
+		newRes := &tlspb.TLSClientResponse{
+			Succeed: msg.GetSucceed(),
+			Result:  msg.GetResult(),
+			Error:   msg.GetError(),
+		}
+		stream.Send(newRes)
 	}
 	return nil
 }
