@@ -7,7 +7,11 @@
 package tlspb
 
 import (
+	context "context"
 	proto "github.com/golang/protobuf/proto"
+	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -255,4 +259,115 @@ func file_github_com_parsaakbari1209_Database_Security_Proxy_client_application_
 	file_github_com_parsaakbari1209_Database_Security_Proxy_client_application_tlspb_client_tls_proto_rawDesc = nil
 	file_github_com_parsaakbari1209_Database_Security_Proxy_client_application_tlspb_client_tls_proto_goTypes = nil
 	file_github_com_parsaakbari1209_Database_Security_Proxy_client_application_tlspb_client_tls_proto_depIdxs = nil
+}
+
+// Reference imports to suppress errors if they are not otherwise used.
+var _ context.Context
+var _ grpc.ClientConnInterface
+
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the grpc package it is being compiled against.
+const _ = grpc.SupportPackageIsVersion6
+
+// TLSClientServiceClient is the client API for TLSClientService service.
+//
+// For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
+type TLSClientServiceClient interface {
+	// This rpc is for client application to call the tls service running on the client behalf.
+	// The client side tls service will send the request to the database-secuirty-service securly.
+	TLSClientSend(ctx context.Context, in *TLSClientRequest, opts ...grpc.CallOption) (TLSClientService_TLSClientSendClient, error)
+}
+
+type tLSClientServiceClient struct {
+	cc grpc.ClientConnInterface
+}
+
+func NewTLSClientServiceClient(cc grpc.ClientConnInterface) TLSClientServiceClient {
+	return &tLSClientServiceClient{cc}
+}
+
+func (c *tLSClientServiceClient) TLSClientSend(ctx context.Context, in *TLSClientRequest, opts ...grpc.CallOption) (TLSClientService_TLSClientSendClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_TLSClientService_serviceDesc.Streams[0], "/tlspb.TLSClientService/TLSClientSend", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &tLSClientServiceTLSClientSendClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type TLSClientService_TLSClientSendClient interface {
+	Recv() (*TLSClientResponse, error)
+	grpc.ClientStream
+}
+
+type tLSClientServiceTLSClientSendClient struct {
+	grpc.ClientStream
+}
+
+func (x *tLSClientServiceTLSClientSendClient) Recv() (*TLSClientResponse, error) {
+	m := new(TLSClientResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+// TLSClientServiceServer is the server API for TLSClientService service.
+type TLSClientServiceServer interface {
+	// This rpc is for client application to call the tls service running on the client behalf.
+	// The client side tls service will send the request to the database-secuirty-service securly.
+	TLSClientSend(*TLSClientRequest, TLSClientService_TLSClientSendServer) error
+}
+
+// UnimplementedTLSClientServiceServer can be embedded to have forward compatible implementations.
+type UnimplementedTLSClientServiceServer struct {
+}
+
+func (*UnimplementedTLSClientServiceServer) TLSClientSend(*TLSClientRequest, TLSClientService_TLSClientSendServer) error {
+	return status.Errorf(codes.Unimplemented, "method TLSClientSend not implemented")
+}
+
+func RegisterTLSClientServiceServer(s *grpc.Server, srv TLSClientServiceServer) {
+	s.RegisterService(&_TLSClientService_serviceDesc, srv)
+}
+
+func _TLSClientService_TLSClientSend_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(TLSClientRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(TLSClientServiceServer).TLSClientSend(m, &tLSClientServiceTLSClientSendServer{stream})
+}
+
+type TLSClientService_TLSClientSendServer interface {
+	Send(*TLSClientResponse) error
+	grpc.ServerStream
+}
+
+type tLSClientServiceTLSClientSendServer struct {
+	grpc.ServerStream
+}
+
+func (x *tLSClientServiceTLSClientSendServer) Send(m *TLSClientResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+var _TLSClientService_serviceDesc = grpc.ServiceDesc{
+	ServiceName: "tlspb.TLSClientService",
+	HandlerType: (*TLSClientServiceServer)(nil),
+	Methods:     []grpc.MethodDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "TLSClientSend",
+			Handler:       _TLSClientService_TLSClientSend_Handler,
+			ServerStreams: true,
+		},
+	},
+	Metadata: "github.com/parsaakbari1209/Database-Security-Proxy/client/application/tlspb/client_tls.proto",
 }
