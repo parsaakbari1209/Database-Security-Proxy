@@ -76,7 +76,6 @@ func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClie
 	return nil
 }
 
-// TODO: Address and port number must be exported from env vars or terminal args.
 // StartService func starts to listen on a port.
 // The transport protocol is tcp.
 func StartService() {
