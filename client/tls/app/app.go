@@ -14,14 +14,16 @@ import (
 // server struct implementes the TLSClientServiceServer interface.
 type server struct{}
 
-// Send Client request from client-side-tls-service to server-side-tls-service and return response.
+// First, send client-request from client-side-tls-service to server-side-tls-service.
+// Second, return response(stream back).
 func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClientService_TLSClientSendServer) error {
 	fmt.Println("TLSClientSend RPC invoked.")
 
-	// Extract data from client request.
+	// Extract data from client-request.
 	connString := req.GetConnString()
 	sqlString := req.GetSqlString()
 
+	// TODO: tls not implemented!
 	// Dial to the server-side-tls-service server.
 	address := "localhost:50052"
 	cc, err := grpc.Dial(address, grpc.WithInsecure())
@@ -43,7 +45,7 @@ func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClie
 		log.Fatalf("error while calling TLSServerSend RPC: %v", err)
 	}
 
-	// Return server-side-tls-service stream to the client.
+	// Return server-side-tls-service stream back to the client.
 	for {
 		msg, err := res.Recv()
 		if err == io.EOF {
