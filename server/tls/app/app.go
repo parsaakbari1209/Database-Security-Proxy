@@ -9,6 +9,7 @@ import (
 
 	"github.com/parsaakbari1209/Database-Security-Proxy/server/tls/tlspb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 type server struct{}
@@ -46,8 +47,18 @@ func StartService() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 
+	// Load server certification and private key file and create credentials.
+	certFile := "ssl/server.crt"
+	keyFile := "ssl/server.pem"
+	creds, sslErr := credentials.NewServerTLSFromFile(certFile, keyFile)
+	if sslErr != nil {
+		log.Fatalf("error while loading certificate or key file: %v", sslErr)
+	}
+	// Create options for new server from credentials.
+	opts := grpc.Creds(creds)
+
 	// Create a new grpc server that serves server-side-tls-service.
-	s := grpc.NewServer()
+	s := grpc.NewServer(opts)
 	tlspb.RegisterTLSServerServiceServer(s, &server{})
 
 	// Start serving.
