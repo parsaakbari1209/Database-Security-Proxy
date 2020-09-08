@@ -9,6 +9,7 @@ import (
 
 	"github.com/parsaakbari1209/Database-Security-Proxy/client/tls/tlspb"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 )
 
 // server struct implementes the TLSClientServiceServer interface.
@@ -23,10 +24,18 @@ func (s *server) TLSClientSend(req *tlspb.TLSClientRequest, stream tlspb.TLSClie
 	connString := req.GetConnString()
 	sqlString := req.GetSqlString()
 
-	// TODO: tls not implemented!
+	// Load certificate file and create credentials.
+	certFile := "ssl/ca.crt"
+	creds, sslErr := credentials.NewClientTLSFromFile(certFile, "")
+	if sslErr != nil {
+		log.Fatalf("error while loading CA certificate file: %v", sslErr)
+	}
+	// Create options for dialing server with credentials.
+	opts := grpc.WithTransportCredentials(creds)
+
 	// Dial to the server-side-tls-service server.
 	address := "localhost:50052"
-	cc, err := grpc.Dial(address, grpc.WithInsecure())
+	cc, err := grpc.Dial(address, opts)
 	if err != nil {
 		log.Fatalf("failed to connect server-side-tls-service: %v", err)
 	}
